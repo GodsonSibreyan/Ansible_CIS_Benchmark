@@ -1,0 +1,84 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godson  #app_servicename 
+      - v3.5  #aspnet
+      - 7.4   #php
+      - 3.6   #python
+      - 11    #java
+  tasks:
+  - name: 9.1 Ensure App Service Authentication is set on Azure App Service (Scored) 
+    command: az webapp auth update --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --enabled false
+    tags:
+      - '9.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.2 Ensure web app redirects all HTTP traffic to HTTPS in Azure App Service (Scored) 
+    command: az webapp update --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --set httpsOnly=false
+    tags:
+      - '9.2'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.3 Ensure web app is using the latest version of TLS encryption (Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --min-tls-version 1.2
+    tags:
+      - '9.3'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On' (Scored) 
+    command: az webapp update --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --set clientCertEnabled=true
+    tags:
+      - '9.4'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.5 Ensure that Register with Azure Active Directory is enabled on App Service (Scored) 
+    command: az webapp identity assign --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}"
+    tags:
+      - '9.5'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.6 Ensure that '.Net Framework' version is the latest, if used as a part of the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --net-framework-version 'v3.5'
+    tags:
+      - '9.6'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.7 Ensure that 'PHP version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --php-version '7.4'
+    tags:
+      - '9.7'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.8 Ensure that 'Python version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --python-version '3.6'
+    tags:
+      - '9.8'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.9 Ensure that 'Java version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --java-version '1.8' --java-container 'Tomcat' --java-container-version '11'
+    tags:
+      - '9.9'
+      - gpgcheck
+      - one
+      - all
+  - name: 9.10 Ensure that 'HTTP Version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[1] }}" --http20-enabled true
+    tags:
+      - '9.10'
+      - gpgcheck
+      - one
+      - all

@@ -1,0 +1,61 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godson  #storage_name
+      - godson  #role_name
+      - godson  #container_name
+      - 9rUD8DIOsLT1xe29U4DiW0bvDUAhnfTGRvJdZ+6ThkJMRCaJDlforypNHstnLBTAfNzkNahVb+NmQmOT5CbbkQ==   #account-key 
+  tasks:
+  - name: 1.23 - Ensure that no custom subscription owner roles are created (Scored)
+    command: az role definition delete --name ""{{ resource[2] }}""
+    tags:
+      - '1.23'
+      - gpgcheck
+      - one
+      - all
+  - name: 3.1 Ensure that 'Secure transfer required' is set to 'Enabled' (Scored)
+    azure_rm_storageaccount:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[1] }}"
+      https_only: on
+    tags:
+      - '3.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 3.3 Ensure Storage logging is enabled for Queue service for read, write, and delete requests (Not Scored)
+    command: az storage logging update --account-name "{{ resource[1] }}" --account-key "{{ resource[4] }}" --services q --log rwd --retention 90
+    tags:
+      - '3.3'
+      - gpgcheck
+      - one
+      - all
+  - name: 3.6 Ensure that 'Public access level' is set to Private for blob containers (Scored)
+    command: az storage container set-permission --name "{{ resource[3] }}" --public-access off --account-name "{{ resource[1] }}" --account-key "{{ resource[4] }}"
+    tags:
+      - '3.6'
+      - gpgcheck
+      - one
+      - all
+  - name: 3.7 Ensure default network access rule for Storage Accounts is set to deny (Scored)
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --default-action Deny
+    tags:
+      - '3.7'
+      - gpgcheck
+      - one
+      - all
+  - name: 3.8 Ensure 'Trusted Microsoft Services' is enabled for Storage Account access (Not Scored)
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --bypass AzureServices
+    tags:
+      - '3.8'
+      - gpgcheck
+      - one
+      - all
+
+
+

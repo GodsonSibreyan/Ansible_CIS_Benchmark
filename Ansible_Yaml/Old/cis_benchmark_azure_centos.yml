@@ -1,0 +1,474 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons         # 0 resource-group
+      - godsons         # 1 storage_name
+      - godson          # 2 role_name { Azure Active Directory > Roles and administrators > New custom role }
+      - godson          # 3 container_name
+      - L+vwx6Bm/kHiKF3fak+pV+aQ+h3AWweKS5yaltPzQ/PbXJvqU9+9/BdeaU/DjvL7t3sQt3q3Tpc/jKpmpa3IgQ==   # 4 account-key 
+#   resource: 4
+      - godson          # 5 db_server_name
+      - godson          # 6 db_name
+      - godsonmy        # 7 mysql_name
+      - godsonp         # 8 postgre_name 
+      - https://godsonkey6.vault.azure.net/                  # 9 key-vault url
+      - 4413ff6d420b4bdc89b7d9c23ccd4f3f                     # 10 key_id or key version
+#    resource: 5
+      - godson          # 11 log profile name
+      - godson          # 12 key name {create key for storage account}
+#    resource: 5.2
+      - godson          # 13 alert name
+#    resource: 6,7
+      - godsonvm        # 14 vm_name
+      - godsonvm-nsg    # 15 nsg_name 
+      - eastus          # 16 location
+      - 2167b0bd-bdbb-400a-adff-8a12920dfc1d                  # 17 Client ID of AAD app
+      - WPQa9zBo68Kl~7jB9k8cG2-~87X4PZX1_e                    # 18 Client Secret of AAD app
+      - d098fbe02ab74b9ea8d8763f1da18e57                      # 19 secret id or version
+      - godsonkey6      # 20 key-vault name
+      - godson          # 21 secret name
+#     resource: 8
+      - godson          # 22 lock name
+#    resource: 9
+      - godson          # 23 app_servicename 
+  tasks:
+  - name: 1.23 - Ensure that no custom subscription owner roles are created (Scored)
+    command: az role definition delete --name ""{{ resource[2] }}""
+    tags:
+      - '1.23'
+      - one
+      - all
+  - name: 2.1 Ensure that standard pricing tier is selected (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/pricings/default?api-version=2017-08-01-preview -d@"input2.json"'
+    tags:
+      - '2.1'
+      - two
+      - all
+  - name: 2.2 Ensure that 'Automatic provisioning of monitoring agent' is set to 'On' (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/autoProvisioningSettings/default?api-version=2017-08-01-preview -d@"input3.json"'
+    tags:
+      - '2.2'
+      - two
+      - all
+  - name: 2.16 Ensure that 'Security contact emails' is set (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.16'
+      - two
+      - all
+  - name: 2.17 Ensure that security contact 'Phnine number' is set (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.17'
+      - two
+      - all
+  - name: 2.18 Ensure that 'Send email notification for high severity alerts' is set to 'On' (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.18'
+      - two
+      - all
+  - name: 2.19 Ensure that 'Send email also to subscription owners' is set to 'On' (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.19'
+      - two
+      - all
+  - name: 3.1 Ensure that 'Secure transfer required' is set to 'Enabled' (Scored)
+    azure_rm_storageaccount:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[1] }}"
+      https_only: on
+    tags:
+      - '3.1'
+      - three
+      - all
+  - name: 3.3 Ensure Storage logging is enabled for Queue service for read, write, and delete requests (Not Scored)
+    command: az storage logging update --account-name "{{ resource[1] }}" --account-key "{{ resource[4] }}" --services q --log rwd --retention 90
+    tags:
+      - '3.3'
+      - three
+      - all
+  - name: 3.6 Ensure that 'Public access level' is set to Private for blob containers (Scored)
+    command: az storage container set-permission --name "{{ resource[3] }}" --public-access off --account-name "{{ resource[1] }}" --account-key "{{ resource[4] }}"
+    tags:
+      - '3.6'
+      - three
+      - all
+  - name: 3.7 Ensure default network access rule for Storage Accounts is set to deny (Scored)
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --default-action Deny
+    tags:
+      - '3.7'
+      - three
+      - all
+  - name: 3.8 Ensure 'Trusted Microsoft Services' is enabled for Storage Account access (Not Scored)
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --bypass AzureServices
+    tags:
+      - '3.8'
+      - three
+      - all
+  - name: 4.9 Ensure that 'Data encryption' is set to 'On' on a SQL Database (Scored) 
+    command: az sql db tde set --resource-group "{{ resource[0] }}" --server "{{ resource[5] }}" --database "{{ resource[6] }}" --status Enabled  
+    tags:
+      - '4.9'
+      - four
+      - all
+  - name: 4.10 Ensure SQL server's TDE protector is encrypted with BYOK (Use your own key) (Scored) 
+    command: az sql server tde-key set --resource-group "{{ resource[0] }}" --server "{{ resource[5] }}" --server-key-type ServiceManaged --kid "{{ resource[9] }}"keys/godson/"{{ resource[10] }}"
+    tags:
+      - '4.10'
+      - four
+      - all
+  - name: 4.11 Ensure 'Enforce SSL connection' is set to 'ENABLED' for MySQL Database Server (Scored) 
+    azure_rm_mysqlserver:
+      resource_group: "{{ resource[0] }}" 
+      name: "{{ resource[7] }}" 
+      enforce_ssl: True
+    tags:
+      - '4.11'
+      - four
+      - all
+  - name: 4.12 Ensure server parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server (Scored)  
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: log_checkpoints
+      value: 'on'    
+    tags:
+      - '4.12'
+      - four
+      - all
+  - name: 4.13 Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlserver:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[8] }}"
+      enforce_ssl: True
+    tags:
+      - '4.13'
+      - four
+      - all
+  - name: 4.14 Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: log_connections
+      value: 'on'
+    tags:
+      - '4.14'
+      - four
+      - all
+  - name: 4.15 Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server (Scored)
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: log_disconnections
+      value: 'on'
+    tags:
+      - '4.15'
+      - four
+      - all
+  - name: 4.16 Ensure server parameter 'log_duration' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: log_duration
+      value: 'on'
+    tags:
+      - '4.16'
+      - four
+      - all      
+  - name: 4.17 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: connection_throttling
+      value: 'on'
+    tags:
+      - '4.17'
+      - four
+      - all
+  - name: 4.18 Ensure server parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[8] }}"
+      name: log_retention_days
+      value: '4'
+    tags:
+      - '4.18'
+      - four
+      - all
+  - name: 5.1.1 Ensure that a Log Profile exists (Scored) 
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[11] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+      retention_policy:
+        enabled: False
+        days: 1
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.1'
+      - five
+      - all
+  - name: 5.1.2 Ensure that Activity Log Retention is set 365 days or greater (Scored)   
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[11] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+      retention_policy:
+        enabled: False
+        days: 90
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.2'
+      - five
+      - all
+  - name: 5.1.3 Ensure audit profile captures all the activities (Scored) 
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[11] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+        - Action
+        - Delete
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.3'
+      - five
+      - all
+  - name: 5.1.5 Ensure the storage container storing the activity logs is not publicly accessible (Scored) 
+    azure_rm_storageaccount:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[1] }}"
+      https_only: no
+    tags:
+      - '5.1.5'
+      - five
+      - all
+  - name: 5.1.6 Ensure the storage account containing the container with activity logs is encrypted with BYOK (Use Your Own Key) (Scored) 
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --encryption-key-source=Microsoft.Keyvault --encryption-key-vault "{{ resource[9] }}" --encryption-key-name "{{ resource[12] }}" --encryption-key-version "{{ resource[10] }}"
+    tags:
+      - '5.1.6'
+      - five
+      - all
+  - name: 5.2.1 Ensure that Activity Log Alert exists for Create Policy Assignment (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.1'
+      - five
+      - all
+  - name: 5.2.2 Ensure that Activity Log Alert exists for Create or Update Network Security Group (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.2'
+      - five
+      - all
+  - name: 5.2.3 Ensure that Activity Log Alert exists for Delete Network Security Group (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.3'
+      - five
+      - all
+  - name: 5.2.4 Ensure that Activity Log Alert exists for Create or Update Network Security Group Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.4'
+      - five
+      - all
+  - name: 5.2.5 Ensure that activity log alert exists for the Delete Network Security Group Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.5'
+      - five
+      - all
+  - name: 5.2.6 Ensure that Activity Log Alert exists for Create or Update Security Solution (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.6'
+      - five
+      - all
+  - name: 5.2.7 Ensure that Activity Log Alert exists for Delete Security Solution (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.7'
+      - five
+      - all
+  - name: 5.2.8 Ensure that Activity Log Alert exists for Create or Update or Delete SQL Server Firewall Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.8'
+      - five
+      - all
+  - name: 5.2.9 Ensure that Activity Log Alert exists for Update Security Policy (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[13] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.9'
+      - five
+      - all
+  - name: 6.4 Ensure that Network Security Group Flow Log retention period is 'greater than 90 days' (Scored) 
+    command: az network watcher flow-log configure --nsg "{{ resource[15] }}" --enabled true --resource-group "{{ resource[0] }}" --retention 91 --storage-account "{{ resource[1] }}"
+    tags:
+      - '6.4'
+      - six
+      - all
+  - name: 6.5 Ensure that Network Watcher is 'Enabled' (Scored) 
+    command: az network watcher configure --location "{{ resource[16] }}" --enabled true --resource-group "{{ resource[0] }}" --tags key[=value] key[=value] 
+    tags:
+      - '6.5'
+      - six
+      - all
+  - name: 7.4 Ensure that only approved extensions are installed (Not Scored) 
+    azure_rm_virtualmachineextension:
+       name: KESL
+       location: eastus
+       resource_group: godsons
+       virtual_machine_name: godsonvm
+       state: absent
+    tags:
+      - '7.4'
+      - seven
+      - all
+  - name: 8.1 Ensure that the expiration date is set on all keys (Scored) 
+    command: az keyvault key set-attributes --name "{{ resource[12] }}" --vault-name "{{ resource[20] }}" --expires '2020-12-30T07:28:38Z'
+    tags:
+      - '8.1'
+      - eight
+      - all
+  - name: 8.2 Ensure that the expiration date is set on all Secrets (Scored) 
+    command: az keyvault secret set-attributes --name "{{ resource[21] }}" --vault-name "{{ resource[20] }}" --expires '2020-12-30T07:28:38Z'
+    tags:
+      - '8.2'
+      - eight
+      - all
+  - name: 8.3 Ensure that Resource Locks are set for mission critical Azure resources (Not Scored) 
+    azure_rm_lock:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[22] }}"
+      level: read_only 
+    tags:
+      - '8.3'
+      - eight
+      - all
+  - name: 8.3.1 Deleting the Lock 
+    azure_rm_lock:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[22] }}"
+      state: absent
+    tags:
+      - '8.3.1'
+      - eight
+      - all
+  - name: 8.4 Ensure the key vault is recoverable (Scored)
+    command: az resource update --id /subscriptions/589b47bf-88b9-48aa-9fb9-86fd723b8472/resourceGroups/godsons/providers/Microsoft.KeyVault/vaults/godsonkey5 --set properties.enablePurgeProtection=true properties.enableSoftDelete=true
+    tags:
+      - '8.4'
+      - eight
+      - all
+  - name: 9.1 Ensure App Service Authentication is set on Azure App Service (Scored) 
+    command: az webapp auth update --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --enabled false
+    tags:
+      - '9.1'
+      - nine
+      - all
+  - name: 9.2 Ensure web app redirects all HTTP traffic to HTTPS in Azure App Service (Scored) 
+    command: az webapp update --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --set httpsOnly=false
+    tags:
+      - '9.2'
+      - nine
+      - all
+  - name: 9.3 Ensure web app is using the latest version of TLS encryption (Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --min-tls-version 1.2
+    tags:
+      - '9.3'
+      - nine
+      - all
+  - name: 9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On' (Scored) 
+    command: az webapp update --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --client-affinity-enabled=true
+    tags:
+      - '9.4'
+      - nine
+      - all
+  - name: 9.5 Ensure that Register with Azure Active Directory is enabled on App Service (Scored) 
+    command: az webapp identity assign --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}"
+    tags:
+      - '9.5'
+      - nine
+      - all
+  - name: 9.6 Ensure that '.Net Framework' version is the latest, if used as a part of the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --net-framework-version 'v3.5'
+    tags:
+      - '9.6'
+      - nine
+      - all
+  - name: 9.7 Ensure that 'PHP version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --php-version '7.4'
+    tags:
+      - '9.7'
+      - nine
+      - all
+  - name: 9.8 Ensure that 'Python version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --python-version '3.6'
+    tags:
+      - '9.8'
+      - nine
+      - all
+  - name: 9.9 Ensure that 'Java version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --java-version '1.8' --java-container 'Tomcat' --java-container-version '11'
+    tags:
+      - '9.9'
+      - nine
+      - all
+  - name: 9.10 Ensure that 'HTTP Version' is the latest, if used to run the web app (Not Scored) 
+    command: az webapp config set --resource-group "{{ resource[0] }}" --name "{{ resource[23] }}" --http20-enabled true
+    tags:
+      - '9.10'
+      - nine
+      - all
+#  - name: 7.1 Ensure that 'OS disk' are encrypted (Scored) 
+#    command: az vm encryption enable --name "{{ resource[14] }}" --resource-group "{{ resource[0] }}" --volume-type OS --aad-client-id "{{ resource[17] }}" --aad-client-secret "{{ resource[18] }}" --disk-encryption-keyvault "{{ resource[9] }}"secrets/"{{ resource[21] }}"/"{{ resource[19] }}"
+#    tags:
+#      - '7.1'
+#      - seven
+#      - all
+#  - name: 7.2 Ensure that 'Data disks' are encrypted (Scored) 
+#    command: az vm encryption enable --name "{{ resource[14] }}" --resource-group "{{ resource[0] }}" --volume-type DATA --aad-client-id "{{ resource[17] }}" --aad-client-secret "{{ resource[18] }}" --disk-encryption-keyvault "{{ resource[9] }}"secrets/"{{ resource[21] }}"/"{{ resource[19] }}"
+#    tags:
+#      - '7.2'
+#      - seven
+#      - all

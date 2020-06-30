@@ -1,0 +1,1 @@
+{ "id": "/subscriptions/589b47bf-88b9-48aa-9fb9-86fd723b8472/providers/Microsoft.Security/securityContacts/default1", "name": "default1", "type": "Microsoft.Security/securityContacts", "properties": { "email": "Godson@zippyopsgmail.onmicrosoft.com", "phone": "9944082468", "alertNotifications": "On", "alertsToAdmins": "On" } }

@@ -1,0 +1,76 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godsons  #storage acccount
+      - godson #database server
+  tasks:
+  - name: 4.1 Ensure that 'Auditing' is set to 'On' (Scored)   
+    win_shell: Set-AzureRmSqlServerAuditingPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -AuditType Table -StorageAccountName "{{ resource[1] }}"
+    tags:
+      - '4.1'
+      - four
+      - all
+  - name: 4.2 Ensure that 'AuditActionGroups' in 'auditing' policy for a SQL server is set properly (Scored) 
+    win_shell: Set-AzureRmSqlServerAuditingPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -StorageAccountName "{{ resource[1] }}" -AuditActionGroup "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP", "FAILED_DATABASE_AUTHENTICATION_GROUP" -RetentionInDays 90
+    tags:
+      - '4.2'
+      - four
+      - all
+  - name: 4.3 Ensure that 'Auditing' Retention is 'greater than 90 days' (Scored) 
+    win_shell: Set-AzureRmSqlServerAuditing -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -StorageAccountName "{{ resource[1] }}" -State Enabled -RetentionInDays 30
+    tags:
+      - '4.3'
+      - four
+      - all
+  - name: 4.4 Ensure that 'Advanced Data Security' on a SQL server is set to 'On' (Scored)   
+    win_shell: Set-AzureRmSqlServerThreatDetectionPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -EmailAdmins $True
+    tags:
+      - '4.4'
+      - four
+      - all
+  - name: 4.5 Ensure that 'Threat Detection types' is set to 'All' (Scored)   
+    win_shell: Set-AzureRmSqlServerThreatDetectionPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -ExcludedDetectionType "Nfour"
+    tags:
+      - '4.5'
+      - four
+      - all
+  - name: 4.6 Ensure that 'Send alerts to' is set (Scored)  
+    win_shell: Set-AzureRmSqlServerThreatDetectionPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -NotificationRecipientsEmails "godsonsibreyan108@gmail.com"
+    tags:
+      - '4.6'
+      - four
+      - all
+  - name: 4.7 Ensure that 'Email service and co-administrators' is 'Enabled' (Scored)  
+    win_shell: Set-AzureRmSqlServerThreatDetectionPolicy -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -EmailAdmins $True
+    tags:
+      - '4.7'
+      - four
+      - all
+#ActivateActiveDirectory Admin in SqlServer
+  - name: 4.8 Ensure that Azure Active Directory Admin is configured (Scored) 
+    win_shell: Set-AzureRmSqlServerActiveDirectoryAdministrator -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -DisplayName "Godson@zippyopsgmail.onmicrosoft.com"
+    tags:
+      - '4.8'
+      - four
+      - all
+  - name: Firewall Creation for execuuting 6.3 command  
+    win_shell: New-AzureRmSqlServerFirewallRule -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -FirewallRuleName "Rule01" -StartIpAddress "192.168.0.190" -EndIpAddress "192.168.0.199"
+    tags:
+      - '6.3'
+      - six
+      - all
+  - name: 6.3 Ensure no SQL Databases allow ingress 0.0.0.0/0 (ANY IP) (Scored)  
+    win_shell: Set-AzureRmSqlServerFirewallRule -ResourceGroupName "{{ resource[0] }}" -ServerName "{{ resource[2] }}" -FirewallRuleName "Rule01" -StartIpAddress "192.168.0.197" -EndIpAddress "192.168.0.199"
+    tags:
+      - '6.3'
+      - six
+      - all
+  - name: Firewall deletion for executing 6.3 command again
+    win_shell: Remove-AzureRmSqlServerFirewallRule -FirewallRuleName "Rule01" -ResourceGroupName "godsons" -ServerName "godson"
+    tags:
+      - '6.3'
+      - six
+      - all

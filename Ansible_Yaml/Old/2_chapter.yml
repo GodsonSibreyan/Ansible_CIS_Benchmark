@@ -1,0 +1,54 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  tasks:
+  - name: 2.1 Ensure that standard pricing tier is selected (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/pricings/default?api-version=2017-08-01-preview -d@"input2.json"'
+    tags:
+      - '2.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 2.2 Ensure that 'Automatic provisioning of monitoring agent' is set to 'On' (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/autoProvisioningSettings/default?api-version=2017-08-01-preview -d@"input3.json"'
+    tags:
+      - '2.2'
+      - gpgcheck
+      - one
+      - all
+  - name: 2.16 Ensure that 'Security contact emails' is set (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.16'
+      - gpgcheck
+      - one
+      - all
+  - name: 2.17 Ensure that security contact 'Phone number' is set (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.17'
+      - gpgcheck
+      - one
+      - all
+  - name: 2.18 Ensure that 'Send email notification for high severity alerts' is set to 'On' (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.18'
+      - gpgcheck
+      - one
+      - all
+  - name: 2.19 Ensure that 'Send email also to subscription owners' is set to 'On' (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview -d@"input.json"'
+    tags:
+      - '2.19'
+      - gpgcheck
+      - one
+      - all

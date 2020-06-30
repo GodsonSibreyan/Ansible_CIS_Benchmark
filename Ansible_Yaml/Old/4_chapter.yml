@@ -1,0 +1,115 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godson  #db_server_name
+      - godson  #db_name
+      - godsonmy  #mysql_name
+      - godsonp  #postgre_name 
+      - https://godsonk.vault.azure.net/ #key-vault
+      - 0e952339cbb44b869fd1b5902e0594c1 #key_id
+  tasks:
+  - name: 4.9 Ensure that 'Data encryption' is set to 'On' on a SQL Database (Scored) 
+    command: az sql db tde set --resource-group "{{ resource[0] }}" --server "{{ resource[1] }}" --database "{{ resource[2] }}" --status Enabled  
+    tags:
+      - '4.9'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.10 Ensure SQL server's TDE protector is encrypted with BYOK (Use your own key) (Scored) 
+    command: az sql server tde-key set --resource-group "{{ resource[0] }}" --server "{{ resource[1] }}" --server-key-type ServiceManaged --kid "{{ resource[5] }}"keys/godson/"{{ resource[6] }}"
+    tags:
+      - '4.10'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.11 Ensure 'Enforce SSL connection' is set to 'ENABLED' for MySQL Database Server (Scored) 
+    azure_rm_mysqlserver:
+      resource_group: "{{ resource[0] }}" 
+      name: "{{ resource[3] }}" 
+      enforce_ssl: True
+    tags:
+      - '4.11'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.12 Ensure server parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server (Scored)  
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: log_checkpoints
+      value: 'on'    
+    tags:
+      - '4.12'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.13 Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlserver:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[4] }}"
+      enforce_ssl: True
+    tags:
+      - '4.13'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.14 Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: log_connections
+      value: 'on'
+    tags:
+      - '4.14'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.15 Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server (Scored)
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: log_disconnections
+      value: 'on'
+    tags:
+      - '4.15'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.16 Ensure server parameter 'log_duration' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: log_duration
+      value: 'on'
+    tags:
+      - '4.16'
+      - gpgcheck
+      - one
+      - all      
+  - name: 4.17 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: connection_throttling
+      value: 'on'
+    tags:
+      - '4.17'
+      - gpgcheck
+      - one
+      - all
+  - name: 4.18 Ensure server parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server (Scored) 
+    azure_rm_postgresqlconfiguration:
+      resource_group: "{{ resource[0] }}"
+      server_name: "{{ resource[4] }}"
+      name: log_retention_days
+      value: '4'
+    tags:
+      - '4.18'
+      - gpgcheck
+      - one
+      - all

@@ -1,0 +1,82 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godson  #alert name
+  tasks:
+  - name: 5.2.1 Ensure that Activity Log Alert exists for Create Policy Assignment (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.2 Ensure that Activity Log Alert exists for Create or Update Network Security Group (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.2'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.3 Ensure that Activity Log Alert exists for Delete Network Security Group (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.3'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.4 Ensure that Activity Log Alert exists for Create or Update Network Security Group Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.4'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.5 Ensure that activity log alert exists for the Delete Network Security Group Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.5'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.6 Ensure that Activity Log Alert exists for Create or Update Security Solution (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.6'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.7 Ensure that Activity Log Alert exists for Delete Security Solution (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.7'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.8 Ensure that Activity Log Alert exists for Create or Update or Delete SQL Server Firewall Rule (Scored) 
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.8'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.2.9 Ensure that Activity Log Alert exists for Update Security Policy (Scored)
+    shell: |
+      az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/$0/resourceGroups/"{{ resource[0] }}"/providers/microsoft.insights/activityLogAlerts/"{{ resource[1] }}"?api-version=2017-04-01 -d@"input5.json"'
+    tags:
+      - '5.2.9'
+      - gpgcheck
+      - one
+      - all

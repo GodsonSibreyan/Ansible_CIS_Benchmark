@@ -1,0 +1,55 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godsonkey3  #key-vault name
+      - godson  #key name
+      - godson   #secret name
+      - godson  #lock name
+  tasks:
+  - name: 8.1 Ensure that the expiration date is set on all keys (Scored) 
+    command: az keyvault key set-attributes --name "{{ resource[2] }}" --vault-name "{{ resource[1] }}" --expires '2020-12-30T07:28:38Z'
+    tags:
+      - '8.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 8.2 Ensure that the expiration date is set on all Secrets (Scored) 
+    command: az keyvault secret set-attributes --name "{{ resource[3] }}" --vault-name "{{ resource[1] }}" --expires '2020-12-30T07:28:38Z'
+    tags:
+      - '8.2'
+      - gpgcheck
+      - one
+      - all
+  - name: 8.3 Ensure that Resource Locks are set for mission critical Azure resources (Not Scored) 
+    azure_rm_lock:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[4] }}"
+      level: read_only 
+    tags:
+      - '8.3'
+      - gpgcheck
+      - one
+      - all
+  - name: 8.3.1 Deleting the Lock 
+    azure_rm_lock:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[4] }}"
+      state: absent
+    tags:
+      - '8.3.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 8.4 Ensure the key vault is recoverable (Scored)
+    command: az resource update --id /subscriptions/589b47bf-88b9-48aa-9fb9-86fd723b8472/resourceGroups/godsons/providers/Microsoft.KeyVault/vaults/godsonkey3 --set properties.enablePurgeProtection=true properties.enableSoftDelete=true
+    tags:
+      - '8.4'
+      - gpgcheck
+      - one
+      - all
+

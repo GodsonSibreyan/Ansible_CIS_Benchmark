@@ -1,0 +1,91 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become_method: sudo
+  become: yes
+  vars:
+    resource:
+      - godsons #resource-group
+      - godsons  #Storage account
+      - godson  #log profile name
+      - godson #keyvault url
+      - godsonkey3  #key name
+      - godson  #key version
+
+  tasks:
+  - name: 5.1.1 Ensure that a Log Profile exists (Scored) 
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[2] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+      retention_policy:
+        enabled: False
+        days: 1
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.1'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.1.2 Ensure that Activity Log Retention is set 365 days or greater (Scored)   
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[2] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+      retention_policy:
+        enabled: False
+        days: 90
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.2'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.1.3 Ensure audit profile captures all the activities (Scored) 
+    azure_rm_monitorlogprofile:
+      name: "{{ resource[2] }}"
+      location: eastus
+      locations:
+        - eastus
+        - westus
+      categories:
+        - Write
+        - Action
+        - Delete
+      storage_account:
+        resource_group: "{{ resource[0] }}"
+        name: "{{ resource[1] }}"
+    tags:
+      - '5.1.3'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.1.5 Ensure the storage container storing the activity logs is not publicly accessible (Scored) 
+    azure_rm_storageaccount:
+      resource_group: "{{ resource[0] }}"
+      name: "{{ resource[1] }}"
+      https_only: no
+    tags:
+      - '5.1.5'
+      - gpgcheck
+      - one
+      - all
+  - name: 5.1.6 Ensure the storage account containing the container with activity logs is encrypted with BYOK (Use Your Own Key) (Scored) 
+    command: az storage account update --name "{{ resource[1] }}" --resource-group "{{ resource[0] }}" --encryption-key-source=Microsoft.Keyvault --encryption-key-vault "{{ resource[3] }}" --encryption-key-name "{{ resource[4] }}" --encryption-key-version "{{ resource[5] }}"
+    tags:
+      - '5.1.6'
+      - gpgcheck
+      - one
+      - all
