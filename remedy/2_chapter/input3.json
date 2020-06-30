@@ -1,0 +1,1 @@
+{ "id": "/subscriptions/589b47bf-88b9-48aa-9fb9-86fd723b8472/providers/Microsoft.Security/autoProvisioningSettings/default", "name": "default", "type": "Microsoft.Security/autoProvisioningSettings", "properties": { "autoProvision": "On" } }
