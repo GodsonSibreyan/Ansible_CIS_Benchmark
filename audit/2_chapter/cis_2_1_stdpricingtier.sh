@@ -1,0 +1,14 @@
+#!/bin/sh
+# ** AUTO GENERATED **
+
+# 2.1 Ensure that standard pricing tier is selected (Scored) 
+
+if [ "$(az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X GET -H "Authorization: Bearer $1" -H "Content-Type: application/json" GET https://management.azure.com/subscriptions/$0/providers/Microsoft.Security/pricings?api-version=2017-08-01-preview' | jq '.|.value[] | select(.name=="default")'|jq '.properties.pricingTier' | grep "Standard" | wc -l)" -eq 0 ]; then
+   echo "PASSED"
+else
+   
+   echo "2.1 Ensure that standard pricing tier is selected (Scored)  FAILED"
+fi
+
+
+
